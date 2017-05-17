@@ -1,5 +1,5 @@
 # AR9285-wireless-card-rebranding
-The idea here is to use a Atheros AR9285 wireless card, and make it look like a Intel Centrino Advanced-N 6205 Wireless card. We do this by modifying the EEPROM card. We copyi the vendor/device/subsystem IDs of the Intel card into the EEPROM Atheros card.
+The idea here is to use a Atheros AR9285 wireless card, and make it look like a Intel Centrino Advanced-N 6205 Wireless card. We do this by modifying the EEPROM card. We copy the vendor/device/subsystem IDs of the Intel card into the EEPROM Atheros card.
 
 My setup:
  - Lenovo Thinkpad X230 with MacOS Sierra and its original Centrino Advanced-N 6205 wireless card
