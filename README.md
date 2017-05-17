@@ -34,7 +34,7 @@ E: SUBSYSTEM=pci
 E: USEC_INITIALIZED=6291525
 ```
 This command give us enough informations about the card. We are interested in the PCI_ID and PCI_SUBSYS_ID. We'll modify both of them.  
-We save those informations somewhere, and we repeat this process with the other wireless card: remove the N6205 card, and put back the AR9285 inside the spared laptop.  
+We save those informations somewhere, remove the N6205 card, and put back the AR9285 inside the spared laptop, and we repeat the process:  
 Result:
 ```
 P: /devices/pci0000:00/0000:00:1c.1/0000:03:00.0
