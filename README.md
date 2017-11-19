@@ -3,7 +3,7 @@ The idea here is to use a Atheros AR9285 wireless card, and make it look like a 
 We do this by modifying the EEPROM card. We copy the vendor/device/subsystem IDs of the Intel card into the EEPROM Atheros card.
 
 My setup:
- - Lenovo Thinkpad X230 with BIOS whitelist, and MacOS Sierra and its original Centrino Advanced-N 6205 wireless card.
+ - Lenovo Thinkpad X230 with BIOS whitelist (v2.67), and MacOS Sierra and its original Centrino Advanced-N 6205 wireless card.
  - Spared Laptop with no restriction, and Ubuntu 16.04.2, and Atheros AR9285 wireless card.
 
 From now on, we'll use the spared laptop.  
