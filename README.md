@@ -2,6 +2,8 @@
 The idea here is to use a Atheros AR9285 wireless card, and make it look like a Intel Centrino Advanced-N 6205 Wireless card.  
 We do this by modifying the EEPROM card. We copy the vendor/device/subsystem IDs of the Intel card into the EEPROM Atheros card.
 
+However, there is an Atheros Card which is whitelisted by Lenovo `168C:002B:17AA:30A1` so its IDs can be use to flash the EEPROM card. But in this tutorial, I will use the Intel IDs.
+
 My setup:
  - Lenovo Thinkpad X230 with BIOS whitelist (v2.67), and MacOS Sierra and its original Centrino Advanced-N 6205 wireless card.
  - Spared Laptop with no restriction, and Ubuntu 16.04.3, and Atheros AR9285 wireless card.
@@ -185,6 +187,7 @@ And into that folder, there will be 2 source files to modify:
 Let's start with hw.h, and look for:
 
 `#define AR9285_DEVID_PCIE         0x002b`
+
 and we replace it with the fake intel ID we're actually using, with is 85:
 
 `#define AR9285_DEVID_PCIE         0x0085`
@@ -199,14 +202,17 @@ Next we go for pci.c, and look for:
 And we add a new line with our fake Intel IDs too:
 
 `{ PCI_VDEVICE(INTEL, 0x0085) },`
+
 Don't forget the change `ATHEROS` into `INTEL`.
 
 Now we're ready to compile to modified atheros module, with:
 
 `make -C /lib/modules/$(uname -r)/build M=$(pwd) modules`
+
 And then, we're ready to install the modified atheros module:
 
 `sudo make -C /lib/modules/$(uname -r)/build M=$(pwd) modules_install`
+
 There might be some sign errors but that should not be a problem.
 
 This will install the modified module into an extra folder: `/lib/modules/(your kernel version)/extra`, this way, it won't overwrite any original atheros module.
