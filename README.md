@@ -293,6 +293,7 @@ When everything is done, don't forget to:
 - launch `sudo depmod` 
 
 Sources:
+
 [How to repair an Atheros 92xx based WiFi card, flashed with wrong IDs](https://www.tonymacx86.com/threads/rebranding-the-atheros-928x-cards-the-guide.115110/page-7#post-816640)
 
 [How (recipe) to build only one kernel module?](https://askubuntu.com/questions/515407/how-recipe-to-build-only-one-kernel-module#515408)
