@@ -144,12 +144,131 @@ So there is the process of put the right IDs back, by using [FakePCIID kexts fro
 
 If you have multi OSs boot, your rebranded wireless card won't work on any of those other OSs without any equivalent solution like FakePCIID.
 
-If for some reasons we want to restore the original EEPROM, we cannot just write it back with iwleeprom. Because the card is not recognized. So we'll need to:
+If for some reasons, we want to change the IDs again, or we want to simply restore the original EEPROM, we cannot just write it back with iwleeprom. Because the card is recognized neither by the system nor by iwleeprom (it's identified as Intel but it's not). So we'll need to:
+- unload the intel module, which is trying to work with the fake intel card,
 - download the linux kernel, 
-- modify the atheros module source code, 
-- launch the modify kernel module,
-- and now use iwleeprom to write back the original EEPROM.
+- modify the atheros module source code by puting the intel IDs,  
+- build, and launch the modify kernel module,
+- modify iwleeprom source code by puting the intel IDs,
+- build, and now use iwleeprom to write back the original EEPROM.
 
 So here the process:
-First we download the Ubuntu Linux kernel source code:
-`apt source linux-image-``uname -r```
+First we need to unload Intel module, which is loaded because of our fake Intel ID inside our Atheros card:
+`sudo modprobe -r iwldvm`
+
+Next we download the Ubuntu Linux kernel source code:
+`apt source linux-image-$(uname -r)`
+
+It'll give us a source code folder, so get into it:
+`cd linux-xxx`
+
+Then we copy our actual config:
+`cp /boot/config-$(uname -r) .config`
+
+Then we prepare some kernel files:
+`make prepare
+make scripts`
+
+Then we go into the atheros module folder:
+`cd drivers/net/wireless/ath/ath9k/`
+
+And into that folder, there will be 2 source files to modify:
+- hw.h
+- and pci.c
+
+Let's start with hw.h, and look for:
+`#define AR9285_DEVID_PCIE         0x002b`
+and we replace it with the fake intel ID we're actually using, with is 85:
+`#define AR9285_DEVID_PCIE         0x0085`
+
+Next we go for pci.c, and look for:
+```
+{ PCI_VDEVICE(ATHEROS, 0x002B) }, /* PCI-E */
+{ PCI_VDEVICE(ATHEROS, 0x002C) }, /* PCI-E 802.11n bonded out */
+{ PCI_VDEVICE(ATHEROS, 0x002D) }, /* PCI   */
+{ PCI_VDEVICE(ATHEROS, 0x002E) }, /* PCI-E */
+```
+And we add a new line with our fake Intel IDs too:
+`{ PCI_VDEVICE(INTEL, 0x0085) },`
+Don't forget the change `ATHEROS` into `INTEL`.
+
+Now we're ready to compile to modified atheros module, with:
+`make -C /lib/modules/$(uname -r)/build M=$(pwd) modules`
+And then, we're ready to install the modified atheros module:
+`sudo make -C /lib/modules/$(uname -r)/build M=$(pwd) modules_install`
+There might be some sign errors but that should not be a problem.
+
+This will install the modified module into an extra folder: `/lib/modules/(your kernel version)/extra`, this way, it won't overwrite any original atheros module.
+
+However, we'll need to temporary disable the original atheros so they won't launch.
+So we go inside the original atheros module folder, and we rename them:
+`cd /lib/modules/$(uname -r)/kernel/drivers/net/wireless/ath/ath9k/`
+
+There will be 4 module files:
+```
+ath9k_common.ko
+ath9k_htc.ko
+ath9k_hw.ko
+ath9k.ko
+```
+We rename them into (by using `sudo mv ...`):
+```
+ath9k_common.ko.backup
+ath9k_htc.ko.backup
+ath9k_hw.ko.backup
+ath9k.ko.backup
+```
+
+Now it's time to launch the modified atheros module:
+```
+sudo depmod
+sudo modprobe -v ath9k
+```
+The atheros card should be up.
+
+Now it's time to modify iwleeprom source code. The idea is pretty much the same: we put the wrong IDs in the source code, so that iwleeprom will recognize the card.
+But first we need to modify `iwlio.c`. Because right now the card is seen as a real Intel card, so we look for:
+```
+/* Intel 6x00/6x50 devices */
+const struct pci_id iwl6k_ids[] = {
+{ INTEL_PCI_VID,   0x0082, "6000 Series Gen2 (6x05)"},
+{ INTEL_PCI_VID,   0x0083, "Centrino Wireless-N 1000"},
+{ INTEL_PCI_VID,   0x0084, "Centrino Wireless-N 1000"},
+{ INTEL_PCI_VID,   0x0085, "6000 Series Gen2 (6x05)"},
+{ INTEL_PCI_VID,   0x0087, "Centrino Advanced-N + WiMAX 6250"},
+```
+And we comment the line with the ID 85 (which is our wrong ID):
+
+`/*{ INTEL_PCI_VID,   0x0085, "6000 Series Gen2 (6x05)"},*/`
+
+That way, iwleeprom won't see it as a real Intel card.
+
+Then we modify ath9kio.c, by looking for atheros IDs:
+```
+/* Atheros 9k devices */
+const struct pci_id ath9k_ids[] = {
+{ ATHEROS_PCI_VID, 0x0023, "AR5416 (AR5008 family) Wireless Adapter (PCI)" },
+{ ATHEROS_PCI_VID, 0x0024, "AR5416 (AR5008 family) Wireless Adapter (PCI-E)" },
+{ ATHEROS_PCI_VID, 0x0027, "AR9160 802.11abgn Wireless Adapter (PCI)" },
+{ ATHEROS_PCI_VID, 0x0029, "AR922X Wireless Adapter (PCI)" },
+{ ATHEROS_PCI_VID, 0x002A, "AR928X Wireless Adapter (PCI-E)" },
+{ ATHEROS_PCI_VID, 0x002B, "AR9285 Wireless Adapter (PCI-E)" },
+{ ATHEROS_PCI_VID, 0x002C, "AR2427 Wireless Adapter (PCI-E)" }, /* PCI-E 802.11n bonded out */
+{ ATHEROS_PCI_VID, 0x002D, "AR9287 Wireless Adapter (PCI)" },
+{ ATHEROS_PCI_VID, 0x002E, "AR9287 Wireless Adapter (PCI-E)" },
+{ 0, 0, "" }
+```
+
+And we add a line with our fake Intel ID:
+
+`{ INTEL_PCI_VID,   0x0085, "My wrong ID Wireless Adapter (PCI)" },`
+
+for the `INTEL_PCI_VID` word to be recognized, we add:
+`#define INTEL_PCI_VID       0x8086` at the begining of file ath9kio.c
+
+Now we compile iwleeprom `make` and we are ready to read or write the eeprom again. When we launch iwleeprom we should see `My wrong ID Wireless Adapter (PCI)` as choice of card.
+
+When everything is done, don't forget to:
+- restore the orginal atheros modules we've backed up. 
+- remove the modified atheros modules from the `extra` folder. 
+- launch `sudo depmod` 
