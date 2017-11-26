@@ -143,3 +143,13 @@ However, the process is not finished. We've bypass the X230 BIOS. But now the AR
 So there is the process of put the right IDs back, by using [FakePCIID kexts from Rehabman](https://github.com/RehabMan/OS-X-Fake-PCI-ID).  
 
 If you have multi OSs boot, your rebranded wireless card won't work on any of those other OSs without any equivalent solution like FakePCIID.
+
+If for some reasons we want to restore the original EEPROM, we cannot just write it back with iwleeprom. Because the card is not recognized. So we'll need to:
+- download the linux kernel, 
+- modify the atheros module source code, 
+- launch the modify kernel module,
+- and now use iwleeprom to write back the original EEPROM.
+
+So here the process:
+First we download the Ubuntu Linux kernel source code:
+`apt source linux-image-\`uname -r\``
