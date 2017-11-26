@@ -154,6 +154,7 @@ If for some reasons, we want to change the IDs again, or we want to simply resto
 
 So here the process:
 First we need to unload Intel module, which is loaded because of our fake Intel ID inside our Atheros card:
+
 `sudo modprobe -r iwldvm`
 
 Next we download the Ubuntu Linux kernel source code:
