@@ -152,4 +152,4 @@ If for some reasons we want to restore the original EEPROM, we cannot just write
 
 So here the process:
 First we download the Ubuntu Linux kernel source code:
-`apt source linux-image-\`uname -r\``
+`apt source linux-image-``uname -r```
