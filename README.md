@@ -158,19 +158,24 @@ First we need to unload Intel module, which is loaded because of our fake Intel 
 `sudo modprobe -r iwldvm`
 
 Next we download the Ubuntu Linux kernel source code:
+
 `apt source linux-image-$(uname -r)`
 
 It'll give us a source code folder, so get into it:
+
 `cd linux-xxx`
 
 Then we copy our actual config:
+
 `cp /boot/config-$(uname -r) .config`
 
 Then we prepare some kernel files:
-`make prepare
-make scripts`
-
+```
+make prepare
+make scripts
+```
 Then we go into the atheros module folder:
+
 `cd drivers/net/wireless/ath/ath9k/`
 
 And into that folder, there will be 2 source files to modify:
@@ -178,8 +183,10 @@ And into that folder, there will be 2 source files to modify:
 - and pci.c
 
 Let's start with hw.h, and look for:
+
 `#define AR9285_DEVID_PCIE         0x002b`
 and we replace it with the fake intel ID we're actually using, with is 85:
+
 `#define AR9285_DEVID_PCIE         0x0085`
 
 Next we go for pci.c, and look for:
@@ -190,12 +197,15 @@ Next we go for pci.c, and look for:
 { PCI_VDEVICE(ATHEROS, 0x002E) }, /* PCI-E */
 ```
 And we add a new line with our fake Intel IDs too:
+
 `{ PCI_VDEVICE(INTEL, 0x0085) },`
 Don't forget the change `ATHEROS` into `INTEL`.
 
 Now we're ready to compile to modified atheros module, with:
+
 `make -C /lib/modules/$(uname -r)/build M=$(pwd) modules`
 And then, we're ready to install the modified atheros module:
+
 `sudo make -C /lib/modules/$(uname -r)/build M=$(pwd) modules_install`
 There might be some sign errors but that should not be a problem.
 
@@ -203,6 +213,7 @@ This will install the modified module into an extra folder: `/lib/modules/(your 
 
 However, we'll need to temporary disable the original atheros so they won't launch.
 So we go inside the original atheros module folder, and we rename them:
+
 `cd /lib/modules/$(uname -r)/kernel/drivers/net/wireless/ath/ath9k/`
 
 There will be 4 module files:
@@ -265,6 +276,7 @@ And we add a line with our fake Intel ID:
 `{ INTEL_PCI_VID,   0x0085, "My wrong ID Wireless Adapter (PCI)" },`
 
 for the `INTEL_PCI_VID` word to be recognized, we add:
+
 `#define INTEL_PCI_VID       0x8086` at the begining of file ath9kio.c
 
 Now we compile iwleeprom `make` and we are ready to read or write the eeprom again. When we launch iwleeprom we should see `My wrong ID Wireless Adapter (PCI)` as choice of card.
