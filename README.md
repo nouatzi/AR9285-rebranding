@@ -4,7 +4,7 @@ We do this by modifying the EEPROM card. We copy the vendor/device/subsystem IDs
 
 My setup:
  - Lenovo Thinkpad X230 with BIOS whitelist (v2.67), and MacOS Sierra and its original Centrino Advanced-N 6205 wireless card.
- - Spared Laptop with no restriction, and Ubuntu 16.04.2, and Atheros AR9285 wireless card.
+ - Spared Laptop with no restriction, and Ubuntu 16.04.3, and Atheros AR9285 wireless card.
 
 From now on, we'll use the spared laptop.  
 First we need to identify both wireless cards. We start with the Centrino Advanced-N 6205 by putting it inside the spared laptop.  
